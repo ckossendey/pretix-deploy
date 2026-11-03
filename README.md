@@ -163,7 +163,7 @@ Christoph führt es aus. Es arbeitet mit einem temporären API-Schlüssel und sc
   - Erfolg `#2E7D5B`, Fehler `#B43A2E`
   - Hintergrund `#f4f6f9`
   - Schrift Fira Sans (Plugin `pretix-fontpack-free`)
-  - S+K-Logo (`assets/skverlag-logo.png`)
+  - Logo „Rettungsdienst. Veranstaltungen.“ (`assets/skverlag-veranstaltungen-logo.png`)
   - Außerdem zeigt der Steuerhinweis an den Preisen nur noch „USt“.
 
 **Themes:** pretix Community hat keine Theme-Sammlung und kein eigenes CSS.

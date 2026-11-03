@@ -25,7 +25,8 @@ args = parser.parse_args()
 
 TOKEN = open(args.token_file).read().strip()
 API = f"{args.url.rstrip('/')}/api/v1"
-LOGO = Path(__file__).resolve().parent.parent / "assets" / "skverlag-logo.png"
+# Logo "Rettungsdienst. Veranstaltungen." (supplied by Christoph, 03.11.2026)
+LOGO = Path(__file__).resolve().parent.parent / "assets" / "skverlag-veranstaltungen-logo.png"
 
 
 def request(method, url, data, content_type, extra_headers=None):
@@ -39,7 +40,7 @@ def request(method, url, data, content_type, extra_headers=None):
 
 
 logo = request("POST", f"{API}/upload", LOGO.read_bytes(), "image/png",
-               {"Content-Disposition": 'attachment; filename="skverlag-logo.png"'})
+               {"Content-Disposition": f'attachment; filename="{LOGO.name}"'})
 
 request("PATCH", f"{API}/organizers/{args.organizer}/settings/", json.dumps({
     "primary_color": "#003770",
