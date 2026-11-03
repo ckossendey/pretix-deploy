@@ -110,10 +110,13 @@ step "Alle Services nach EU West (Amsterdam) legen"
 for name in Postgres Redis "$SERVICE"; do
   move_to_eu "$name"
 done
-check_regions || fail "Nicht alle Services liegen in EU West. Noch ist nichts deployt und kein Volume an pretix: Region im Railway-Dashboard korrigieren, dann die restlichen Schritte von Hand."
+# An empty service reports no region until its first deployment; the
+# final check below covers pretix.
 
 step "Volume /data am Service $SERVICE"
-railway volume --service "$SERVICE" add --mount-path /data
+# `railway volume --service … add` panics in CLI 5.71; linking first works.
+railway service link "$SERVICE"
+railway volume add --mount-path /data
 
 step "Variablen setzen"
 set_var() { railway variable set "$1" --service "$SERVICE" --skip-deploys >/dev/null; echo "  gesetzt: ${1%%=*}"; }
@@ -151,7 +154,8 @@ railway domain "$DOMAIN" --service "$SERVICE" --port 80
 step "GitHub-Repo verbinden (startet den ersten Deploy)"
 railway service source connect --repo "$REPO" --branch main --service "$SERVICE"
 
-step "Regionen zur Kontrolle"
+step "Regionen zur Kontrolle (nach dem Start des ersten Deploys)"
+sleep 30
 check_regions || fail "Ein Service liegt außerhalb von EU West – bitte melden, bevor Daten hineinkommen."
 
 step "Fertig. Noch von Hand:"
