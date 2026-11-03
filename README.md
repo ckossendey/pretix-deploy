@@ -21,7 +21,8 @@ Plan und Begründung: `event-participant-manager/docs/PRETIX_PLAN.md`.
 
 Unterschiede zum offiziellen Image `pretix/standalone`:
 
-- **Plugin pretix-zugferd** für E-Rechnungen (`requirements.txt`).
+- **Plugin pretix-zugferd** für E-Rechnungen (`requirements.txt`) plus
+  **Ghostscript**, ohne das keine E-Rechnung entsteht.
 - **Cron ist eingebaut** (`deploy/cron-loop.sh`). Das offizielle Image hat
   keinen, pretix braucht ihn aber für Zahlungserinnerungen, Verfall
   unbezahlter Bestellungen und Aufräumarbeiten.
@@ -111,6 +112,54 @@ Einstellungsdatei liest Railway nur noch bis 01.12.2026.
 
 Jede pretix-Einstellung lässt sich als `PRETIX_<ABSCHNITT>_<NAME>` setzen
 ([Doku](https://docs.pretix.eu/self-hosting/config/)).
+
+## Shop einrichten
+
+`bin/setup-shop.sh <pretix-adresse>` erledigt die Einrichtung in einem
+Durchgang. Christoph führt es aus, weil es per SSH in den Container schreibt.
+
+1. **`bin/bootstrap_organizer.py`** (im Container, per `railway ssh`):
+   - legt den Veranstalter `sk` („S+K Verlag“) mit den nötigen Plugins an
+   - legt das Team „Administratoren“ mit dem Admin an
+   - setzt die **Veranstalter-Einstellungen**, die jede Veranstaltung erbt:
+     - Verkäuferangaben auf der Rechnung (aus dem Impressum von skverlag.de)
+     - Rechnung mit eingebetteter E-Rechnung (ZUGFeRD, Profil XRechnung)
+     - Nummernkreis `SK-`, Testbestellungen bekommen `SK-TEST-`
+     - Feld für Leitweg-ID oder Bestellnummer
+     - Rechnungsadresse Pflicht, USt-IdNr. abfragbar
+     - Überweisung mit 14 Tagen Zahlungsziel, ohne automatischen Verfall, Erinnerung 3 Tage vorher
+     - Namen und E-Mail je Ticket, nachträglich änderbar durch Besteller und Teilnehmer
+     - Impressum- und Datenschutz-Link
+2. **`bin/setup-testshop.py`** (über die API): legt die Testveranstaltung
+   `testshop` im Testmodus an. Inhalt:
+   - Kongressticket mit Behörde- und Industriepreis
+   - Workshops als Zusatz, je Zeitfenster höchstens einer
+   - Kombiticket mit Abendessen
+   - Streaming-Ticket mit eigener Steuerregel
+   - die Fragen `organisation`, `funktion` und `efn`
+3. **Noch einmal `bin/bootstrap_organizer.py`:** pretix schreibt beim Anlegen
+   einer Veranstaltung eigene Standardwerte an die Veranstaltung, z. B.
+   Rechnungsvorlage ohne E-Rechnung und Namensformat ohne Titel. Das Skript
+   entfernt diese Kopien, damit die Veranstalter-Einstellungen gelten, und
+   schaltet den temporären API-Schlüssel ab.
+
+**Neue Veranstaltungen:** im Backend aus der Testveranstaltung kopieren
+oder danach `bin/bootstrap-organizer.sh --no-token` ausführen.
+
+**Offen, bevor echte Tickets verkauft werden:**
+- echte Bankverbindung
+- Stripe-Schlüssel
+- Teilnahmebedingungen / AGB für Veranstaltungen
+- Steuerregeln von der Steuerberatung abgenommen (Plan, Abschnitt 12)
+
+**Gefundene pretix-Eigenheiten (2026.9.0):**
+- Das E-Rechnungs-Plugin braucht Ghostscript. Ohne Ghostscript entsteht
+  stillschweigend keine E-Rechnung. Das Dockerfile installiert es.
+- Die API lehnt `name_scheme` nach dem ersten Aufruf je Prozess ab (die
+  Auswahl wird aus einem Generator gebaut, `settings.py` Zeile 4061). Das
+  Skript versucht es und gibt sonst einen Hinweis aus.
+- Rechnungsvorlage, Teilnehmer-Mails und „Rechnung sofort bei Überweisung“
+  lassen sich nicht per API setzen, deshalb Schritt 3.
 
 ## Updates
 

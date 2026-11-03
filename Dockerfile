@@ -6,6 +6,12 @@ FROM pretix/standalone:2026.9.0
 
 USER root
 
+# pretix-zugferd needs Ghostscript to turn the invoice into PDF/A-3; without
+# it no e-invoice XML is embedded (and nothing complains).
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ghostscript && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt /tmp/pretix-deploy-requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/pretix-deploy-requirements.txt && \
     rm /tmp/pretix-deploy-requirements.txt
