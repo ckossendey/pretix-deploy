@@ -9,7 +9,8 @@
 #
 # Secrets are never printed:
 #   - PRETIX_DJANGO_SECRET and the admin password are generated here.
-#   - The Mailjet keys are copied from the events.skverlag.de project.
+#   - The Mailjet keys are copied separately with bin/copy-mailjet-keys.sh
+#     (it reads the production project of the participant app).
 # The admin password can be looked up in Railway (service pretix, Variables,
 # PRETIX_ADMIN_PASSWORD) and should be deleted there after the first login.
 #
@@ -79,17 +80,11 @@ projects=$(railway list --json)
 if printf '%s' "$projects" | json_field "sys.exit(0 if any(p['name']=='$PROJECT' for p in json.load(sys.stdin)) else 1)"; then
   fail "Railway-Projekt $PROJECT existiert schon"
 fi
-events_id=$(printf '%s' "$projects" | json_field "print(next(p['id'] for p in json.load(sys.stdin) if p['name']=='$EVENTS_PROJECT'))")
 workspace=$(printf '%s' "$projects" | json_field "
 w = next(p['workspace'] for p in json.load(sys.stdin) if p['name']=='$EVENTS_PROJECT')
 print(w['id'] if isinstance(w, dict) else w)")
 
-events_vars=$(railway variable list --project "$events_id" --service web --environment production --kv)
-mailjet_key=$(printf '%s\n' "$events_vars" | sed -n 's/^MAILJET_API_KEY=//p')
-mailjet_secret=$(printf '%s\n' "$events_vars" | sed -n 's/^MAILJET_SECRET_KEY=//p')
-unset events_vars
-[ -n "$mailjet_key" ] && [ -n "$mailjet_secret" ] || fail "Mailjet-Schlüssel im Projekt $EVENTS_PROJECT nicht gefunden"
-echo "ok: Repo öffentlich, Projekt noch nicht vorhanden, Mailjet-Schlüssel gefunden"
+echo "ok: Repo öffentlich, Projekt noch nicht vorhanden"
 
 # --- Create ------------------------------------------------------------------
 step "Projekt $PROJECT anlegen"
@@ -148,9 +143,6 @@ set_var "PRETIX_MAIL_FROM=kundenservice@skverlag.de"
 set_var "PRETIX_ADMIN_EMAIL=$ADMIN_EMAIL"
 
 openssl rand -hex 50 | set_secret PRETIX_DJANGO_SECRET
-printf '%s' "$mailjet_key" | set_secret PRETIX_MAIL_USER
-printf '%s' "$mailjet_secret" | set_secret PRETIX_MAIL_PASSWORD
-unset mailjet_key mailjet_secret
 openssl rand -base64 30 | tr -d '/+=\n' | cut -c1-24 | set_secret PRETIX_ADMIN_PASSWORD
 
 step "Domain $DOMAIN (Port 80)"
@@ -164,6 +156,7 @@ check_regions || fail "Ein Service liegt außerhalb von EU West – bitte melden
 
 step "Fertig. Noch von Hand:"
 cat <<EOF
+0. bin/copy-mailjet-keys.sh ausführen (Mailjet-Schlüssel für den Mailversand).
 1. Den oben angezeigten DNS-Eintrag (CNAME) für $DOMAIN bei skverlag.de anlegen.
 2. In Railway für die Volumes von Postgres und $SERVICE Backups einschalten
    (täglich, wöchentlich, monatlich), wie bei der Teilnehmer-App.
