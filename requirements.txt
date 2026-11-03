@@ -1,0 +1,3 @@
+# pretix plugins installed into the image (versions pinned, updated by Dependabot).
+# E-invoices (ZUGFeRD / XRechnung profile), Apache-2.0, https://github.com/pretix/pretix-zugferd
+pretix-zugferd==2.6.4
