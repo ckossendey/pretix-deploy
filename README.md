@@ -78,8 +78,9 @@ prüft vorher alle Voraussetzungen und am Ende die Region.
    - Testmail aus pretix senden (Veranstalter → E-Mail-Einstellungen). Kommt
      sie nicht an, erlaubt der Railway-Plan kein SMTP.
 
-`railway.json` legt fest: Bau per Dockerfile, Neustart bei Absturz bis zu
-10-mal.
+Eine `railway.json` gibt es bewusst nicht. Railway erkennt das Dockerfile
+selbst und startet bei Absturz standardmäßig bis zu 10-mal neu. Die alte
+Einstellungsdatei liest Railway nur noch bis 01.12.2026.
 
 **Bewusst ohne Railway-Healthcheck:**
 - Railway prüft unter dem Host-Namen `healthcheck.railway.app`. pretix
