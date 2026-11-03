@@ -29,12 +29,18 @@ WANTED_PLUGINS = {
     # Free plugins added on 03.11.2026 (Christoph: "alle aufnehmen"). Available to all
     # events; switched on per event in the backend (Einstellungen → Plugins).
     "pretix_pages",
-    "pretix_withdrawal",
     "pretix_passbook",
     "pretix_enablebanking",
     "pretix_event_css_js",
     "prtx_faq",
     "pretix_dbevent",
+}
+
+# Installed but switched off for the organizer and every event until a legal
+# check says it is needed (Christoph, 03.11.2026): the withdrawal button shows
+# up in the footer of every shop page as soon as the plugin is on.
+DISABLED_PLUGINS = {
+    "pretix_withdrawal",
 }
 
 FOOTER = ("Stumpf + Kossendey Verlagsgesellschaft mbH · Rathausstraße 1 · 26188 Edewecht · "
@@ -102,8 +108,14 @@ with scopes_disabled():
     print("PLUGINS_MISSING", sorted(WANTED_PLUGINS - available))
 
     org, created = Organizer.objects.get_or_create(slug="sk", defaults={"name": "S+K Verlag"})
-    org.plugins = ",".join(sorted(set(filter(None, (org.plugins or "").split(","))) | (WANTED_PLUGINS & available)))
+    org.plugins = ",".join(sorted((set(filter(None, (org.plugins or "").split(","))) | (WANTED_PLUGINS & available)) - DISABLED_PLUGINS))
     org.save(update_fields=["plugins"])
+    for event in org.events.all():
+        current = set(filter(None, (event.plugins or "").split(",")))
+        if current & DISABLED_PLUGINS:
+            event.plugins = ",".join(sorted(current - DISABLED_PLUGINS))
+            event.save(update_fields=["plugins"])
+            print("EVENT", event.slug, "Plugins ausgeschaltet:", ", ".join(sorted(current & DISABLED_PLUGINS)))
     for key, value in SETTINGS.items():
         org.settings.set(key, value)
 

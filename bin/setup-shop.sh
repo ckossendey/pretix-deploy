@@ -21,5 +21,6 @@ echo "== 2/3 Testveranstaltung"
 python3 -I bin/setup-testshop.py --url "$URL" --token-file "$TOKEN_FILE" $EXTRA
 python3 -I bin/testshop-workshops.py --url "$URL" --token-file "$TOKEN_FILE"
 python3 -I bin/design-skverlag.py --url "$URL" --token-file "$TOKEN_FILE"
+python3 -I bin/testshop-plugins.py --url "$URL" --token-file "$TOKEN_FILE"
 echo "== 3/3 Einstellungen auf die Veranstaltung, Token aus"
 bash bin/bootstrap-organizer.sh --event testshop

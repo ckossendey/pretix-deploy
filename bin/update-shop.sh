@@ -20,6 +20,8 @@ bash bin/bootstrap-organizer.sh --token-file "$TOKEN_FILE"
 status=0
 echo "== Workshops nachträglich und einzeln buchbar"
 python3 -I bin/testshop-workshops.py --url "$URL" --token-file "$TOKEN_FILE" || status=$?
+echo "== Plugins der Testveranstaltung"
+python3 -I bin/testshop-plugins.py --url "$URL" --token-file "$TOKEN_FILE" || status=$?
 echo "== Design"
 python3 -I bin/design-skverlag.py --url "$URL" --token-file "$TOKEN_FILE" || status=$?
 echo "== Schlüssel abschalten"
