@@ -24,7 +24,9 @@ unset RAILWAY_API_TOKEN
 cd "$(dirname "$0")/.."
 
 PROJECT="tickets.skverlag.de"
-DOMAIN="tickets.skverlag.de"
+DOMAIN="${2:?eigene Shop-Domain als 2. Argument angeben}"
+# tickets.skverlag.de is the live Tickettoaster shop (03.11.2026), never take it over.
+[ "$DOMAIN" != "tickets.skverlag.de" ] || { echo "ABBRUCH: tickets.skverlag.de ist der laufende Tickettoaster-Shop" >&2; exit 1; }
 REPO="ckossendey/pretix-deploy"
 EVENTS_PROJECT="events.skverlag.de"
 SERVICE="pretix"

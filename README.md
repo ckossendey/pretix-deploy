@@ -1,6 +1,13 @@
 # pretix-deploy – Ticketshop des S+K Verlags
 
-Betriebs-Repo für den Ticketshop **tickets.skverlag.de**. Es enthält kein
+Betriebs-Repo für den pretix-Ticketshop (Testadresse
+https://pretix-production-4731.up.railway.app).
+
+> **Achtung:** `tickets.skverlag.de` ist der laufende **Tickettoaster**-Shop
+> (Stand 03.11.2026). Der DNS-Eintrag darf nicht auf Railway zeigen, solange
+> Tickettoaster verkauft. Die eigene Adresse für pretix ist noch festzulegen.
+
+Das Repo enthält kein
 eigenes pretix-Programm, nur das Rezept, mit dem das offizielle
 [pretix Community](https://github.com/pretix/pretix) (Open Source, keine
 Lizenzgebühren) auf Railway läuft: Dockerfile, Plugins, Start-Skripte,
@@ -67,7 +74,8 @@ prüft vorher alle Voraussetzungen und am Ende die Region.
 3. Variablen am Service `pretix` wie in `.env.example`. Die Geheimnisse
    erzeugt das Skript oder übernimmt sie aus dem Teilnehmer-App-Projekt
    (Mailjet). Ausgegeben werden sie nie.
-4. Domain `tickets.skverlag.de` am Service `pretix`, Port 80. Der
+4. Eigene Domain am Service `pretix`, Port 80 (Adresse noch festzulegen,
+   **nicht** `tickets.skverlag.de`). Der
    CNAME-Eintrag, den Railway anzeigt, kommt in die DNS-Verwaltung von
    skverlag.de.
 5. Backups in Railway für **beide** Volumes (Postgres und pretix), wie bei
@@ -91,7 +99,7 @@ Einstellungsdatei liest Railway nur noch bis 01.12.2026.
 - Weil der Service ein Volume hat, stoppt Railway den alten Container
   ohnehin vor dem neuen. Die Prüfung brächte also keinen unterbrechungsfreien
   Wechsel.
-- Für eine Überwachung eignet sich `https://tickets.skverlag.de/healthcheck/`
+- Für eine Überwachung eignet sich `https://<pretix-adresse>/healthcheck/`
   (antwortet 200, solange die Datenbank erreichbar ist).
 
 **Hinweise:**
@@ -102,7 +110,7 @@ Einstellungsdatei liest Railway nur noch bis 01.12.2026.
 
 | Variable | Zweck |
 |---|---|
-| `PRETIX_PRETIX_URL` | öffentliche Adresse, `https://tickets.skverlag.de` |
+| `PRETIX_PRETIX_URL` | öffentliche Adresse, derzeit die Railway-Testadresse |
 | `PRETIX_DJANGO_SECRET` | geheimer Schlüssel, `openssl rand -hex 50`, nie ändern (sonst sind alle abgemeldet) |
 | `PRETIX_DATABASE_*` | Verweise auf den Postgres-Service |
 | `PRETIX_REDIS_LOCATION`, `PRETIX_CELERY_*` | Verweise auf den Redis-Service (Datenbanken 0, 1, 2) |
