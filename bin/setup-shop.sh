@@ -16,8 +16,8 @@ TOKEN_FILE=$(mktemp)
 trap 'rm -f "$TOKEN_FILE"' EXIT
 
 echo "== 1/3 Veranstalter und Grundeinstellungen"
-bash bin/bootstrap-organizer.sh "$TOKEN_FILE"
+bash bin/bootstrap-organizer.sh --token-file "$TOKEN_FILE"
 echo "== 2/3 Testveranstaltung"
 python3 -I bin/setup-testshop.py --url "$URL" --token-file "$TOKEN_FILE" $EXTRA
 echo "== 3/3 Einstellungen auf die Veranstaltung, Token aus"
-bash bin/bootstrap-organizer.sh --no-token
+bash bin/bootstrap-organizer.sh --event testshop

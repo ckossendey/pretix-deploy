@@ -143,8 +143,13 @@ Durchgang. Christoph führt es aus, weil es per SSH in den Container schreibt.
    entfernt diese Kopien, damit die Veranstalter-Einstellungen gelten, und
    schaltet den temporären API-Schlüssel ab.
 
-**Neue Veranstaltungen:** im Backend aus der Testveranstaltung kopieren
-oder danach `bin/bootstrap-organizer.sh --no-token` ausführen.
+**Neue Veranstaltungen:**
+- im Backend aus der Testveranstaltung kopieren, oder
+- direkt nach dem Anlegen `bin/bootstrap-organizer.sh --event <kürzel>`
+  ausführen.
+
+Das Skript ändert nur Veranstaltungen ohne echte Bestellungen. Spätere
+Anpassungen im Backend bleiben erhalten.
 
 **Offen, bevor echte Tickets verkauft werden:**
 - echte Bankverbindung

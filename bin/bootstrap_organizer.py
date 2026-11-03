@@ -8,8 +8,9 @@
 #   (delete that team in pretix after the setup)
 # - Organizer-wide defaults that every event inherits: seller data on
 #   invoices (from the imprint of skverlag.de), invoice and payment rules,
-#   attendee data, legal links. Event-level copies of these keys are removed,
-#   so run it again after creating an event.
+#   attendee data, legal links. With PRETIX_BOOTSTRAP_EVENT=<slug> the
+#   event-level copies pretix makes for a new event are removed (only for
+#   events without real orders).
 import os
 
 from django_scopes import scopes_disabled
@@ -99,12 +100,18 @@ with scopes_disabled():
 
     # pretix writes some defaults directly onto every new event (e.g. invoice
     # layout, attendee mail, name scheme). Those copies hide the organizer
-    # values above, so remove them: every event then uses the organizer
-    # defaults. Run this script again after creating an event.
-    for event in org.events.all():
-        for key in SETTINGS:
-            event.settings.delete(key)
-        print("EVENT", event.slug, "nutzt die Veranstalter-Einstellungen")
+    # values above. PRETIX_BOOTSTRAP_EVENT=<slug> removes them for that one
+    # event, but only while it has no orders, so changes made later in the
+    # backend of a real event are never overwritten.
+    event_slug = os.environ.get("PRETIX_BOOTSTRAP_EVENT", "").strip()
+    if event_slug:
+        event = org.events.get(slug=event_slug)
+        if event.orders.filter(testmode=False).exists():
+            print("EVENT", event.slug, "hat schon echte Bestellungen, Einstellungen bleiben unverändert")
+        else:
+            for key in SETTINGS:
+                event.settings.delete(key)
+            print("EVENT", event.slug, "nutzt die Veranstalter-Einstellungen")
 
     admin = User.objects.get(email=os.environ["PRETIX_ADMIN_EMAIL"])
     admins, _ = Team.objects.get_or_create(
