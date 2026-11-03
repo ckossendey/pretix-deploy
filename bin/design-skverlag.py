@@ -51,6 +51,13 @@ request("PATCH", f"{API}/organizers/{args.organizer}/settings/", json.dumps({
     "primary_font": "Fira Sans",
     "organizer_logo_image": logo["id"],
     "organizer_logo_image_inherit": True,   # events show the organizer logo
+    # Welcome text on the overview of all events (like the Tickettoaster start page)
+    "organizer_homepage_text": {"de": (
+        "## Herzlich willkommen im Ticketshop von Stumpf + Kossendey\n\n"
+        "Hier finden Sie Tickets für unsere Symposien, Kongresse, Workshops und Seminare "
+        "für den Rettungsdienst. Bei Fragen erreichen Sie uns unter "
+        "[kundenservice@skverlag.de](mailto:kundenservice@skverlag.de).")},
+    "event_list_type": "list",
 }).encode(), "application/json")
 
 print("ok: Design von skverlag.de übernommen (Farben, Schrift Fira Sans, Logo)")
