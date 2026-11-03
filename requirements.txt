@@ -3,3 +3,15 @@
 pretix-zugferd==2.6.4
 # Free web fonts incl. Fira Sans (font of skverlag.de), Apache-2.0, https://github.com/pretix/pretix-fontpack-free
 pretix-fontpack-free==1.11.2
+# Legal and info pages inside the shop (e.g. Teilnahmebedingungen), by pretix
+pretix-pages==1.6.4
+# Withdrawal function per EU directive 2023/2673 ("Widerrufsbutton"), by pretix
+pretix-withdrawal==1.1.0
+# Tickets for Apple Wallet / Android wallets, by pretix
+pretix-passbook==1.14.1
+# Automatic bank transaction import via Enable Banking (PSD2), MIT, third party
+pretix-enablebanking==1.0.4
+# Custom CSS/JS per event, MIT, third party
+pretix-event-css-js==1.0.2
+# Advertises the discounted DB (Deutsche Bahn) event offer to attendees, Apache-2.0, by pretix
+pretix-dbevent==1.0.0

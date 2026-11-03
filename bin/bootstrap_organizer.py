@@ -26,6 +26,15 @@ WANTED_PLUGINS = {
     "pretix.plugins.statistics",
     "pretix.plugins.reports",
     "pretix_zugferd",
+    # Free plugins added on 03.11.2026 (Christoph: "alle aufnehmen"). Available to all
+    # events; switched on per event in the backend (Einstellungen → Plugins).
+    "pretix_pages",
+    "pretix_withdrawal",
+    "pretix_passbook",
+    "pretix_enablebanking",
+    "pretix_event_css_js",
+    "prtx_faq",
+    "pretix_dbevent",
 }
 
 FOOTER = ("Stumpf + Kossendey Verlagsgesellschaft mbH · Rathausstraße 1 · 26188 Edewecht · "

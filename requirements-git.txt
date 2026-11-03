@@ -1,0 +1,5 @@
+# Plugins installed from git. They are built against the Django of the pretix image
+# (pip --no-build-isolation), because their build step imports Django.
+# FAQ page per event, Apache-2.0, third party. PyPI only has 1.0.3 (2023); 1.2.0 has the
+# fixes for current pretix (imports, no django-bootstrap4).
+prtx-faq @ git+https://github.com/pretalx/prtx-faq@v1.2.0

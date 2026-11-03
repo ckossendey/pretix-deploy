@@ -31,6 +31,15 @@ Unterschiede zum offiziellen Image `pretix/standalone`:
 - **Plugin pretix-zugferd** für E-Rechnungen (`requirements.txt`) plus
   **Ghostscript**, ohne das keine E-Rechnung entsteht.
 - **Plugin pretix-fontpack-free** für die Schrift Fira Sans (wie skverlag.de).
+- **Weitere kostenlose Plugins** (`requirements.txt`, `requirements-git.txt`). Beim Veranstalter
+  freigegeben, pro Veranstaltung unter Einstellungen → Plugins einschalten:
+  - Pages: eigene Seiten, z. B. Teilnahmebedingungen
+  - Withdrawal: Widerrufsfunktion, vor dem Einsatz rechtlich klären
+  - Passbook: Wallet-Tickets, braucht ein Apple-Zertifikat
+  - Enable Banking: automatischer Bankabgleich, braucht ein Enable-Banking-Konto
+  - Event CSS & JS: eigenes CSS
+  - FAQ (`prtx-faq`, von GitHub, ohne Build-Isolation gebaut, weil sein Build Django braucht)
+  - DB Event Offers: Veranstaltungsticket der Bahn
 - **Cron ist eingebaut** (`deploy/cron-loop.sh`). Das offizielle Image hat
   keinen, pretix braucht ihn aber für Zahlungserinnerungen, Verfall
   unbezahlter Bestellungen und Aufräumarbeiten.

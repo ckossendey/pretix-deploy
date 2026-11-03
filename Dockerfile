@@ -12,9 +12,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ghostscript && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /tmp/pretix-deploy-requirements.txt
-RUN pip3 install --no-cache-dir -r /tmp/pretix-deploy-requirements.txt && \
-    rm /tmp/pretix-deploy-requirements.txt
+COPY requirements.txt requirements-git.txt /tmp/pretix-deploy/
+RUN pip3 install --no-cache-dir -r /tmp/pretix-deploy/requirements.txt && \
+    pip3 install --no-cache-dir pretix-plugin-build && \
+    pip3 install --no-cache-dir --no-build-isolation -r /tmp/pretix-deploy/requirements-git.txt && \
+    rm -r /tmp/pretix-deploy
 
 COPY deploy/entrypoint.sh /usr/local/bin/railway-entrypoint
 COPY deploy/cron-loop.sh deploy/secure_default_admin.py /usr/local/share/pretix-deploy/
