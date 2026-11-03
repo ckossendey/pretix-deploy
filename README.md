@@ -23,6 +23,7 @@ Unterschiede zum offiziellen Image `pretix/standalone`:
 
 - **Plugin pretix-zugferd** für E-Rechnungen (`requirements.txt`) plus
   **Ghostscript**, ohne das keine E-Rechnung entsteht.
+- **Plugin pretix-fontpack-free** für die Schrift Fira Sans (wie skverlag.de).
 - **Cron ist eingebaut** (`deploy/cron-loop.sh`). Das offizielle Image hat
   keinen, pretix braucht ihn aber für Zahlungserinnerungen, Verfall
   unbezahlter Bestellungen und Aufräumarbeiten.
@@ -142,6 +143,25 @@ Durchgang. Christoph führt es aus, weil es per SSH in den Container schreibt.
    Rechnungsvorlage ohne E-Rechnung und Namensformat ohne Titel. Das Skript
    entfernt diese Kopien, damit die Veranstalter-Einstellungen gelten, und
    schaltet den temporären API-Schlüssel ab.
+
+**Spätere Ergänzungen an einem eingerichteten Shop:** `bin/update-shop.sh <pretix-adresse>`.
+Christoph führt es aus. Es arbeitet mit einem temporären API-Schlüssel und schaltet ihn danach ab.
+- `bin/testshop-workshops.py`: Workshops nachträglich buchbar.
+  - **In derselben Bestellung:** „Bestellung ändern“, nur Preiserhöhung, bis 14 Tage vor Beginn.
+  - **In einer eigenen Bestellung:** Einzelbuchungs-Artikel, z. B. für eine andere Kostenstelle. Sie teilen sich das Kontingent mit dem Zusatz-Workshop.
+  - Dazu kommt die Frist für Teilnehmerdaten (14 Tage vor Beginn).
+- `bin/design-skverlag.py`: Aussehen von skverlag.de, gilt für den ganzen Veranstalter.
+  - Marineblau `#003770`
+  - Erfolg `#2E7D5B`, Fehler `#B43A2E`
+  - Hintergrund `#f4f6f9`
+  - Schrift Fira Sans (Plugin `pretix-fontpack-free`)
+  - S+K-Logo (`assets/skverlag-logo.png`)
+  - Außerdem zeigt der Steuerhinweis an den Preisen nur noch „USt“.
+
+**Themes:** pretix Community hat keine Theme-Sammlung und kein eigenes CSS.
+Gestalten lassen sich Farben, Schrift, Logo, runde Ecken und Texte. Wer den
+Shop direkt in skverlag.de einbetten will, nutzt das pretix-Widget auf der
+TYPO3-Veranstaltungsseite.
 
 **Neue Veranstaltungen:**
 - im Backend aus der Testveranstaltung kopieren, oder

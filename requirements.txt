@@ -1,3 +1,5 @@
 # pretix plugins installed into the image (versions pinned, updated by Dependabot).
 # E-invoices (ZUGFeRD / XRechnung profile), Apache-2.0, https://github.com/pretix/pretix-zugferd
 pretix-zugferd==2.6.4
+# Free web fonts incl. Fira Sans (font of skverlag.de), Apache-2.0, https://github.com/pretix/pretix-fontpack-free
+pretix-fontpack-free==1.11.2

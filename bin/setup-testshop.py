@@ -80,10 +80,11 @@ except urllib.error.HTTPError:
 
 # --- Tax rules (PRETIX_PLAN.md, section 12; to be confirmed by the tax advisor)
 on_site = call("POST", f"{E}/taxrules/", {
-    "name": {"de": "USt 19 % (Präsenz, Leistungsort Veranstaltungsort)"}, "rate": "19.00", "code": "S/standard",
+    "name": {"de": "USt"}, "internal_name": "USt 19 % Präsenz (Leistungsort Veranstaltungsort)",
+    "rate": "19.00", "code": "S/standard",
     "price_includes_tax": True, "default": True, "custom_rules": None})["id"]
 streaming_tax = call("POST", f"{E}/taxrules/", {
-    "name": {"de": "USt Streaming (Leistungsort Kunde)"}, "rate": "19.00", "code": "S/standard",
+    "name": {"de": "USt"}, "internal_name": "USt Streaming (Leistungsort Kunde)", "rate": "19.00", "code": "S/standard",
     "price_includes_tax": True, "keep_gross_if_rate_changes": False, "custom_rules": [
         {"country": "DE", "address_type": "", "action": "vat"},
         {"country": "EU", "address_type": "business_vat_id", "action": "reverse", "code": "AE",
@@ -115,7 +116,7 @@ for code, title, category in [("V1", "Atemwegsmanagement", morning), ("V2", "Kin
                             "description": {"de": "Max. 20 Plätze. Nur zusammen mit einem Kongressticket buchbar."}})
 dinner = item({"name": {"de": "Abendessen"}, "category": extras, "default_price": "40.00", "require_bundling": True})
 congress = item({
-    "name": {"de": "Kongressticket"}, "category": tickets, "default_price": "290.00", "admission": True, "personalized": True,
+    "name": {"de": "Kongressticket"}, "category": tickets, "position": 1, "default_price": "290.00", "admission": True, "personalized": True,
     "description": {"de": "Zwei Kongresstage inkl. Tagungsunterlagen und Verpflegung in den Pausen."},
     "has_variations": True,
     "variations": [{"value": {"de": "Behörde / Rettungsdienst"}, "default_price": "250.00", "active": True},
@@ -124,13 +125,13 @@ congress = item({
                {"addon_category": afternoon, "min_count": 0, "max_count": 1, "price_included": False}],
 })
 combo = item({
-    "name": {"de": "Kombiticket Kongress + Abendessen"}, "category": tickets, "default_price": "330.00",
+    "name": {"de": "Kombiticket Kongress + Abendessen"}, "category": tickets, "position": 2, "default_price": "330.00",
     "admission": True, "personalized": True,
     "bundles": [{"bundled_item": dinner["id"], "bundled_variation": None, "count": 1, "designated_price": "40.00"}],
     "addons": [{"addon_category": morning, "min_count": 0, "max_count": 1, "price_included": False},
                {"addon_category": afternoon, "min_count": 0, "max_count": 1, "price_included": False}],
 })
-streaming = item({"name": {"de": "Streaming-Ticket"}, "category": tickets, "default_price": "150.00",
+streaming = item({"name": {"de": "Streaming-Ticket"}, "category": tickets, "position": 3, "default_price": "150.00",
                   "admission": True, "personalized": True, "tax_rule": streaming_tax,
                   "description": {"de": "Live-Stream beider Kongresstage, Zugangsdaten per E-Mail."}})
 

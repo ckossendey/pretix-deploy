@@ -3,3 +3,4 @@
 .env
 *.md
 docker-compose.yml
+assets
