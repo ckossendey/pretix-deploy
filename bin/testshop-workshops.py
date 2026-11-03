@@ -81,9 +81,11 @@ else:
 
 order_question = next((q for q in questions if q["identifier"] == "kongress_bestellung"), None)
 created = []
+already_there = 0
 for workshop in sorted((i for i in items if i["category"] in addon_category_ids), key=lambda i: i["name"]["de"]):
     name = f"{workshop['name']['de']} (Einzelbuchung)"
     if name in names:
+        already_there += 1
         continue
     standalone = call("POST", "/items/", {
         "name": {"de": name}, "category": standalone_category, "active": True,
@@ -115,6 +117,7 @@ if new_ids:
             "type": "S", "required": False, "items": new_ids, "position": 10, "ask_during_checkin": False,
             "help_text": {"de": "Falls zur Hand (steht in der Bestellbestätigung), damit wir die Buchungen sicher zuordnen."}})
 
-print(f"ok: {len(created)} Workshop(s) einzeln buchbar, gemeinsame Platzzahl mit dem Zusatz-Workshop")
+print(f"ok: {len(created) + already_there} Workshop(s) einzeln buchbar ({len(created)} neu angelegt), "
+      "gemeinsame Platzzahl mit dem Zusatz-Workshop")
 for item in created:
     print("   -", item["name"]["de"])
