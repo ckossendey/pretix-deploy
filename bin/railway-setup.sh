@@ -18,6 +18,10 @@
 set -euo pipefail
 unset RAILWAY_API_TOKEN
 
+# `railway init` links the current directory to the new project. Always work
+# in this repo, never in a parent folder that holds other Railway projects.
+cd "$(dirname "$0")/.."
+
 PROJECT="tickets.skverlag.de"
 DOMAIN="tickets.skverlag.de"
 REPO="ckossendey/pretix-deploy"
@@ -29,6 +33,37 @@ step() { printf '\n== %s\n' "$*"; }
 fail() { printf '\nABBRUCH: %s\n' "$*" >&2; exit 1; }
 
 json_field() { python3 -c "import json,sys; $1" ; }
+
+# Prints "service: region(s)" and fails if any configured region is outside
+# EU West (europe-west4). Read-only.
+check_regions() {
+  railway service list --json | python3 -c '
+import json, sys
+outside = []
+for s in json.load(sys.stdin):
+    regions = [r["name"] for r in s.get("regions", []) if r.get("configured")]
+    name = s["name"]
+    shown = ", ".join(regions) or "keine Region"
+    note = " (Volume wird gerade verschoben)" if s.get("volumeMigrating") else ""
+    print(f"  {name}: {shown}{note}")
+    if not regions or any(not r.startswith("europe-west4") for r in regions):
+        outside.append(name)
+sys.exit(1 if outside else 0)'
+}
+
+# Moves a service to EU West and removes replicas from every other region.
+move_to_eu() {
+  local name="$1" others
+  railway service scale --service "$name" eu-west=1
+  others=$(railway service list --json | python3 -c "
+import json, sys
+s = next(s for s in json.load(sys.stdin) if s['name'] == '$name')
+print(' '.join(f\"{r['name']}=0\" for r in s.get('regions', []) if r.get('configured') and not r['name'].startswith('europe-west4')))")
+  if [ -n "$others" ]; then
+    # shellcheck disable=SC2086 # one argument per region
+    railway service scale --service "$name" $others
+  fi
+}
 
 # --- Preconditions (nothing is created before this section has passed) ------
 step "Voraussetzungen prüfen"
@@ -78,8 +113,9 @@ done
 
 step "Alle Services nach EU West (Amsterdam) legen"
 for name in Postgres Redis "$SERVICE"; do
-  railway service scale --service "$name" eu-west=1 us-west=0 us-east=0 southeast-asia=0
+  move_to_eu "$name"
 done
+check_regions || fail "Nicht alle Services liegen in EU West. Noch ist nichts deployt und kein Volume an pretix: Region im Railway-Dashboard korrigieren, dann die restlichen Schritte von Hand."
 
 step "Volume /data am Service $SERVICE"
 railway volume --service "$SERVICE" add --mount-path /data
@@ -123,6 +159,9 @@ railway domain "$DOMAIN" --service "$SERVICE" --port 80
 step "GitHub-Repo verbinden (startet den ersten Deploy)"
 railway service source connect --repo "$REPO" --branch main --service "$SERVICE"
 
+step "Regionen zur Kontrolle"
+check_regions || fail "Ein Service liegt außerhalb von EU West – bitte melden, bevor Daten hineinkommen."
+
 step "Fertig. Noch von Hand:"
 cat <<EOF
 1. Den oben angezeigten DNS-Eintrag (CNAME) für $DOMAIN bei skverlag.de anlegen.
@@ -131,4 +170,5 @@ cat <<EOF
 3. Nach dem ersten Deploy auf https://$DOMAIN/control/ mit $ADMIN_EMAIL anmelden.
    Passwort: Railway → $PROJECT → $SERVICE → Variables → PRETIX_ADMIN_PASSWORD.
    Zwei-Faktor-Anmeldung einrichten, dann PRETIX_ADMIN_PASSWORD in Railway löschen.
+4. In pretix eine Testmail senden. Kommt sie nicht an, erlaubt der Railway-Plan kein SMTP.
 EOF

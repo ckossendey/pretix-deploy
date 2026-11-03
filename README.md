@@ -55,25 +55,41 @@ docker compose up --build
 
 ### Einmal-Einrichtung
 
+Die Schritte 1 bis 4 erledigt `bin/railway-setup.sh <admin-e-mail>`. Es
+prüft vorher alle Voraussetzungen und am Ende die Region.
+
 1. Railway-Projekt `tickets.skverlag.de` mit den Services `pretix`
    (Quelle: dieses Repo, Branch `main`), `Postgres` und `Redis`, alle in der
    Region **EU West (europe-west4)**.
 2. Volume am Service `pretix`, Mount-Pfad `/data`.
-3. Variablen am Service `pretix` wie in `.env.example`. Geheimnisse
-   (Django-Secret, Mailjet-Schlüssel, Admin-Passwort) setzt Christoph selbst.
+3. Variablen am Service `pretix` wie in `.env.example`. Die Geheimnisse
+   erzeugt das Skript oder übernimmt sie aus dem Teilnehmer-App-Projekt
+   (Mailjet). Ausgegeben werden sie nie.
 4. Domain `tickets.skverlag.de` am Service `pretix`, Port 80. Der
    CNAME-Eintrag, den Railway anzeigt, kommt in die DNS-Verwaltung von
    skverlag.de.
 5. Backups in Railway für **beide** Volumes (Postgres und pretix), wie bei
    der Teilnehmer-App: täglich, wöchentlich, monatlich.
 6. Nach dem ersten erfolgreichen Start:
-   - mit `PRETIX_ADMIN_EMAIL` anmelden
+   - mit `PRETIX_ADMIN_EMAIL` anmelden (Passwort steht in Railway unter
+     den Variablen von `pretix`)
    - Zwei-Faktor-Anmeldung einrichten (Pflicht, `PRETIX_PRETIX_OBLIGATORY_2FA`)
    - Variable `PRETIX_ADMIN_PASSWORD` in Railway löschen
+   - Testmail aus pretix senden (Veranstalter → E-Mail-Einstellungen). Kommt
+     sie nicht an, erlaubt der Railway-Plan kein SMTP.
 
-`railway.json` legt fest: Bau per Dockerfile, Healthcheck `/healthcheck/`
-(bis 10 Minuten, weil der erste Start alle Migrationen ausführt), Neustart
-bei Absturz bis zu 10-mal.
+`railway.json` legt fest: Bau per Dockerfile, Neustart bei Absturz bis zu
+10-mal.
+
+**Bewusst ohne Railway-Healthcheck:**
+- Railway prüft unter dem Host-Namen `healthcheck.railway.app`. pretix
+  beantwortet unbekannte Host-Namen mit 400, also wäre jeder Deploy
+  gescheitert.
+- Weil der Service ein Volume hat, stoppt Railway den alten Container
+  ohnehin vor dem neuen. Die Prüfung brächte also keinen unterbrechungsfreien
+  Wechsel.
+- Für eine Überwachung eignet sich `https://tickets.skverlag.de/healthcheck/`
+  (antwortet 200, solange die Datenbank erreichbar ist).
 
 **Hinweise:**
 - Ausgehende Mails per SMTP gehen auf Railway erst ab dem Pro-Plan.

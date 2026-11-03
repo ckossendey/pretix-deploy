@@ -5,13 +5,13 @@
 #   Shop/Backend: http://localhost:8345/control/   Mails: http://localhost:18025
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     environment:
       POSTGRES_DB: pretix
       POSTGRES_USER: pretix
       POSTGRES_PASSWORD: pretix-local-only
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pretix -d pretix"]
       interval: 2s
