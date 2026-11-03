@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # New pretix release (pretix/standalone image)
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+  # Plugins in requirements.txt
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly

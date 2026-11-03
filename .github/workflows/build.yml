@@ -1,0 +1,52 @@
+# Builds the image and starts it once with Postgres and Redis, so that a pretix
+# or plugin update (Dependabot PR) is only merged when the shop actually starts.
+name: Build und Starttest
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Image bauen und starten
+        run: docker compose up -d --build
+
+      - name: Warten, bis pretix antwortet
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:8345/healthcheck/ > /dev/null; then
+              echo "pretix antwortet nach ${i}0 Sekunden"
+              exit 0
+            fi
+            sleep 10
+          done
+          docker compose logs pretix | tail -100
+          exit 1
+
+      - name: Prüfen, dass Plugins geladen und Standard-Admin ersetzt ist
+        run: |
+          docker compose exec -T pretix python3 -c "import pretix_zugferd; print('pretix-zugferd geladen')"
+          docker compose logs pretix | grep -F "[pretix-deploy] Standard-Admin ersetzt"
+          curl -fsS -o /dev/null -w "Login-Seite: %{http_code}\n" http://localhost:8345/control/login
+
+      - name: Prüfen, dass der Cron läuft
+        run: |
+          for i in $(seq 1 24); do
+            if docker compose logs pretix | grep -q "pretixcron entered RUNNING state"; then
+              echo "Cron läuft"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose logs pretix | tail -50
+          exit 1
+
+      - name: Logs bei Fehler
+        if: failure()
+        run: docker compose logs
