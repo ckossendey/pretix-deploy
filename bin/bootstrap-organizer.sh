@@ -2,7 +2,7 @@
 # Organizer setup inside the running pretix on Railway (via railway ssh).
 #
 #   bash bin/bootstrap-organizer.sh --token-file <file>   organizer + settings, new temporary API token
-#   bash bin/bootstrap-organizer.sh --event <slug>        organizer settings onto a new event, tokens off
+#   bash bin/bootstrap-organizer.sh --event <slug>[,<slug>…]  organizer settings onto new events, tokens off
 #
 # Runs bin/bootstrap_organizer.py in the container. The temporary API token
 # is written to the given file (mode 600) and never printed. Needs SSH write

@@ -8,7 +8,7 @@
 #   (delete that team in pretix after the setup)
 # - Organizer-wide defaults that every event inherits: seller data on
 #   invoices (from the imprint of skverlag.de), invoice and payment rules,
-#   attendee data, legal links. With PRETIX_BOOTSTRAP_EVENT=<slug> the
+#   attendee data, legal links. With PRETIX_BOOTSTRAP_EVENT=<slug>[,<slug>…] the
 #   event-level copies pretix makes for a new event are removed (only for
 #   events without real orders).
 import os
@@ -121,11 +121,12 @@ with scopes_disabled():
 
     # pretix writes some defaults directly onto every new event (e.g. invoice
     # layout, attendee mail, name scheme). Those copies hide the organizer
-    # values above. PRETIX_BOOTSTRAP_EVENT=<slug> removes them for that one
-    # event, but only while it has no orders, so changes made later in the
+    # values above. PRETIX_BOOTSTRAP_EVENT=<slug>[,…] removes them for these
+    # events, but only while they have no real orders, so changes made later in the
     # backend of a real event are never overwritten.
-    event_slug = os.environ.get("PRETIX_BOOTSTRAP_EVENT", "").strip()
-    if event_slug:
+    # Several events: comma-separated slugs (bin/import-tickettoaster.sh)
+    event_slugs = [s.strip() for s in os.environ.get("PRETIX_BOOTSTRAP_EVENT", "").split(",") if s.strip()]
+    for event_slug in event_slugs:
         event = org.events.get(slug=event_slug)
         if event.orders.filter(testmode=False).exists():
             print("EVENT", event.slug, "hat schon echte Bestellungen, Einstellungen bleiben unverändert")

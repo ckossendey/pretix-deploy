@@ -1,0 +1,12 @@
+# Tickettoaster products to take over into pretix (Christoph, 04.11.2026).
+# Public product API of Tickettoaster, one URL per line.
+https://ext.tickettoaster.de/api/750/1/product/64e305c9977c450094f1d82590e2d654.json
+https://ext.tickettoaster.de/api/750/1/product/b36bbe4adad545ffb207d887c5ae62e7.json
+https://ext.tickettoaster.de/api/750/1/product/1c2bba2d44ce4f808d70db1c891778d0.json
+https://ext.tickettoaster.de/api/750/1/product/403e48e9abba4b6dae6240c68275c7e9.json
+https://ext.tickettoaster.de/api/750/1/product/291f310305fd4e7081e4ffb9abfa5865.json
+https://ext.tickettoaster.de/api/750/1/product/6db6bdc00fb843b9b24b04cb982cccf3.json
+https://ext.tickettoaster.de/api/750/1/product/6124a00f7e97488db3be7a5c83de8daa.json
+https://ext.tickettoaster.de/api/750/1/product/4940b97e77e04911a6db95244cc204d9.json
+https://ext.tickettoaster.de/api/750/1/product/de5fb2182bbc4cd7be40d1aa923d56c7.json
+https://ext.tickettoaster.de/api/750/1/product/4e7c91d725324cce9d7814b7049f2e4d.json

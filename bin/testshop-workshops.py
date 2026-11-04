@@ -30,7 +30,7 @@ args = parser.parse_args()
 TOKEN = open(args.token_file).read().strip()
 E = f"{args.url.rstrip('/')}/api/v1/organizers/{args.organizer}/events/{args.event}"
 FOURTEEN_DAYS_BEFORE = "RELDATE/14/23:59:59/date_from/"
-STANDALONE_CATEGORY = "Workshop zu einem vorhandenen Kongressticket nachbuchen"
+STANDALONE_CATEGORY = "Workshop zu einem vorhandenen Ticket nachbuchen"
 
 
 def call(method, path, body=None):
@@ -71,13 +71,18 @@ names = {i["name"].get("de") for i in items}
 quotas = all_results("/quotas/")
 questions = all_results("/questions/")
 
-if STANDALONE_CATEGORY in categories:
-    standalone_category = categories[STANDALONE_CATEGORY]["id"]
-else:
-    standalone_category = call("POST", "/categories/", {
-        "name": {"de": STANDALONE_CATEGORY}, "is_addon": False, "position": 10,
-        "description": {"de": "Für Teilnehmende, die schon ein Kongressticket haben, z. B. wenn der Workshop über eine "
-                              "andere Kostenstelle abgerechnet wird. Bitte Name der teilnehmenden Person angeben."}})["id"]
+
+
+def standalone_category():
+    """Category of the standalone workshops, created with the first one (events without
+    workshops get no empty category)."""
+    if STANDALONE_CATEGORY not in categories:
+        categories[STANDALONE_CATEGORY] = call("POST", "/categories/", {
+            "name": {"de": STANDALONE_CATEGORY}, "is_addon": False, "position": 10,
+            "description": {"de": "Für Teilnehmende, die schon ein Ticket haben, z. B. wenn der Workshop über eine "
+                                  "andere Kostenstelle abgerechnet wird. Bitte Name der teilnehmenden Person angeben."}})
+    return categories[STANDALONE_CATEGORY]["id"]
+
 
 order_question = next((q for q in questions if q["identifier"] == "kongress_bestellung"), None)
 created = []
@@ -88,12 +93,12 @@ for workshop in sorted((i for i in items if i["category"] in addon_category_ids)
         already_there += 1
         continue
     standalone = call("POST", "/items/", {
-        "name": {"de": name}, "category": standalone_category, "active": True,
+        "name": {"de": name}, "category": standalone_category(), "active": True,
         "default_price": workshop["default_price"], "tax_rule": workshop["tax_rule"],
         # pretix only asks for a name per ticket on admission products
         "admission": True, "personalized": True,
-        "description": {"de": "Nur zusammen mit einem Kongressticket derselben Person. Plätze werden mit der "
-                              "Workshop-Buchung im Kongressticket gemeinsam gezählt."},
+        "description": {"de": "Nur zusammen mit einem Ticket derselben Person. Plätze werden mit der "
+                              "Workshop-Buchung im Ticket gemeinsam gezählt."},
     })
     created.append(standalone)
     # Same quota as the add-on workshop: one seat count for both ways of booking
@@ -113,7 +118,7 @@ if new_ids:
         call("PATCH", f"/questions/{order_question['id']}/", {"items": order_question["items"] + new_ids})
     else:
         call("POST", "/questions/", {
-            "question": {"de": "Bestellnummer Ihres Kongresstickets"}, "identifier": "kongress_bestellung",
+            "question": {"de": "Bestellnummer Ihres Tickets"}, "identifier": "kongress_bestellung",
             "type": "S", "required": False, "items": new_ids, "position": 10, "ask_during_checkin": False,
             "help_text": {"de": "Falls zur Hand (steht in der Bestellbestätigung), damit wir die Buchungen sicher zuordnen."}})
 

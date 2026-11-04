@@ -180,9 +180,26 @@ Gestalten lassen sich Farben, Schrift, Logo, runde Ecken und Texte. Wer den
 Shop direkt in skverlag.de einbetten will, nutzt das pretix-Widget auf der
 TYPO3-Veranstaltungsseite.
 
+**Testmodus:** `bin/run-with-token.sh bin/testshop-testmode.py <pretix-adresse>` schaltet
+den Testmodus der Testveranstaltung ein (`--off` aus). Das Skript meldet auch echte
+Bestellungen aus der Zeit ohne Testmodus.
+
+**Veranstaltungen aus Tickettoaster:** `bin/import-tickettoaster.sh <pretix-adresse>`
+legt die Produkte aus `data/tickettoaster-products.txt` als Veranstaltungen an. Sie
+sind live, aber im Testmodus. Gebuchte Tickets werden nicht übernommen, die
+Kontingente bekommen die volle Platzzahl. Vorschau ohne Schlüssel:
+`python3 -I bin/import-tickettoaster.py --dry-run`. Regeln (Kopf von
+`bin/import-tickettoaster.py`):
+- Netto-Varianten fallen weg, weil pretix über die Steuerregeln netto rechnet.
+- Aus „Ticket inkl. Workshop“ werden Ticket plus Zusatz-Workshop.
+- Workshops, deren Zeiten sich überschneiden, sind Alternativen (einer je Person).
+- Online-Veranstaltungen und Streaming-Tickets bekommen die Steuerregel Streaming.
+- Preise für Abonnenten, Mitglieder, Gästeliste und Gewinnspiel gibt es nur mit Gutschein.
+- Veranstaltungen, die es schon gibt, bleiben unverändert.
+
 **Neue Veranstaltungen:**
 - im Backend aus der Testveranstaltung kopieren, oder
-- direkt nach dem Anlegen `bin/bootstrap-organizer.sh --event <kürzel>`
+- direkt nach dem Anlegen `bin/bootstrap-organizer.sh --event <kürzel>[,<kürzel>…]`
   ausführen.
 
 Das Skript ändert nur Veranstaltungen ohne echte Bestellungen. Spätere
