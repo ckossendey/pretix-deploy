@@ -18,9 +18,10 @@ How Tickettoaster variants become pretix products (rules in this order):
   - online event              location "Online": every product gets the streaming
                               tax rule (place of supply = customer)
   - "Get-Together"            supporting programme, no ticket of its own
-  - Abonnent/Mitglied/Gästeliste/Gewinnspiel
-                              own product, only with a voucher code, hidden
-                              otherwise; shares the quota of its group
+  - Abonnent/Mitglied         own product, freely selectable (Christoph,
+                              04.11.2026); shares the quota of its group
+  - Gästeliste/Gewinnspiel    own product, only with a voucher code, hidden
+                              otherwise (free tickets); shares the quota of its group
   - "Neu"                     unclear, created inactive
   - everything else           ticket (personalized, admission)
 
@@ -58,7 +59,11 @@ PLUGINS = ["pretix.plugins.banktransfer", "pretix.plugins.ticketoutputpdf", "pre
            "pretix.plugins.statistics", "pretix.plugins.reports", "pretix_zugferd",
            "pretix_pages", "prtx_faq", "pretix_passbook", "pretix_event_css_js"]
 TRAIN_PLUGIN = "pretix_dbevent"  # DB event offer, only for events on site
+# Special prices: own product in the quota of their group. Only guest list and
+# prize draw (free tickets) need a voucher; subscriber and member prices are
+# freely selectable, as in Tickettoaster (Christoph, 04.11.2026).
 RESTRICTED = re.compile(r"abonnent|mitglied|gaesteliste|gewinnspiel")
+VOUCHER_ONLY = re.compile(r"gaesteliste|gewinnspiel")
 STOPWORDS = {"in", "im", "der", "die", "das", "fuer", "und", "von", "zu", "mit", "am", "an", "beginn", "uhr"}
 MONTHS = {m: i for i, m in enumerate(["januar", "februar", "maerz", "april", "mai", "juni", "juli", "august",
                                       "september", "oktober", "november", "dezember"], start=1)}
@@ -202,13 +207,15 @@ def plan_event(url, data):
             else:
                 kind = "ticket"
             product = {"name": name, "price": price, "cap": cap, "kind": kind, "restricted": restricted,
+                       "voucher_only": bool(VOUCHER_ONLY.search(key)),
                        "active": key != "neu", "quota_of": None, "extra_cap": 0}
             if restricted:
                 label, rest = qualifier(name)
                 product["display"] = f"{short_name(base['name'] if base else rest, title)} – {label}"
                 if base and cap is None:
                     product["quota_of"] = base
-                log(f"nur mit Gutschein: {product['display']}" + (" (gleiches Kontingent)" if product["quota_of"] else ""))
+                log(("nur mit Gutschein: " if product["voucher_only"] else "Sonderpreis: ") + product["display"]
+                    + (" (gleiches Kontingent)" if product["quota_of"] else ""))
             elif not product["active"]:
                 product["display"] = name
                 event["flags"].append(f"Variante „{name}“ ({price:.2f} €, {cap} Plätze) unklar: inaktiv angelegt")
@@ -376,7 +383,7 @@ def create_event(event):
             "position": position, "default_price": f"{product['price']:.2f}", "tax_rule": tax_for(product["kind"]),
             "active": product["active"], "admission": is_ticket, "personalized": is_ticket,
         }
-        if product["restricted"]:
+        if product["voucher_only"]:
             body.update(require_voucher=True, hide_without_voucher=True)
         if product["kind"] == "ticket" and not event["online"] and addons:
             body["addons"] = addons

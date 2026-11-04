@@ -194,7 +194,9 @@ Kontingente bekommen die volle Platzzahl. Vorschau ohne Schlüssel:
 - Aus „Ticket inkl. Workshop“ werden Ticket plus Zusatz-Workshop.
 - Workshops, deren Zeiten sich überschneiden, sind Alternativen (einer je Person).
 - Online-Veranstaltungen und Streaming-Tickets bekommen die Steuerregel Streaming.
-- Preise für Abonnenten, Mitglieder, Gästeliste und Gewinnspiel gibt es nur mit Gutschein.
+- Preise für Abonnenten und Mitglieder sind frei wählbar, Gästeliste und Gewinnspiel (gratis)
+  nur mit Gutschein. `bin/open-member-prices.py` gibt Abo- und Mitgliederpreise in schon
+  angelegten Veranstaltungen frei.
 - Veranstaltungen, die es schon gibt, bleiben unverändert.
 
 **Neue Veranstaltungen:**
