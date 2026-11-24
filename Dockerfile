@@ -2,7 +2,7 @@
 #
 # Based on the official image (pinned version, see README "Updates").
 # Plugins come from requirements.txt so Dependabot can update them.
-FROM pretix/standalone:2026.9.0
+FROM pretix/standalone:2026.9.3
 
 USER root
 
